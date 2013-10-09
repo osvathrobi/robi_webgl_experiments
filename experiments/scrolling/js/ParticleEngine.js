@@ -208,6 +208,9 @@ function ParticleEngine()
     // How many particles could be active at any time?
     this.particleCount = -1; 
 
+    this.lastTime = -1;
+    this.emitterSecondInRealTime = 0.5;
+    
     //////////////
     // THREE.JS //
     //////////////
@@ -231,16 +234,16 @@ ParticleEngine.prototype.setValues = function( parameters )
         this[ key ] = parameters[ key ];
 	
     // attach tweens to particles
-    Particle.prototype.sizeTween    = this.sizeTween;
-    Particle.prototype.colorTween   = this.colorTween;
-    Particle.prototype.opacityTween = this.opacityTween;	
+    //Particle.prototype.sizeTween    = this.sizeTween;
+    //Particle.prototype.colorTween   = this.colorTween;
+    //Particle.prototype.opacityTween = this.opacityTween;	
 	
     // calculate/set derived particle engine values
     this.particleArray = [];
     this.emitterAge      = 0.0;
     this.emitterAlive    = true;
-    this.particleCount = this.particleBudget;
-	
+    this.particleCount = this.particleBudget;	
+
     this.particleGeometry = new THREE.Geometry();
     this.particleMaterial = new THREE.ShaderMaterial( 
     {
@@ -301,6 +304,12 @@ ParticleEngine.prototype.createParticle = function()
 {
     var particle = new Particle();
 
+
+    // attach tweens to particles
+    particle.sizeTween    = this.sizeTween;
+    particle.colorTween   = this.colorTween;
+    particle.opacityTween = this.opacityTween;
+    
     if (this.positionStyle == Type.CUBE)            
         particle.position = this.randomVector3( this.positionBase, this.positionSpread ); 
     if (this.positionStyle == Type.SPHERE)
@@ -349,7 +358,9 @@ ParticleEngine.prototype.initialize = function()
     {
         // remove duplicate code somehow, here and in update function below.
         this.particleArray[i] = this.createParticle();
-        this.particleArray[i].age = 9999; // Robi hack: send them all to recycle immediately
+        //this.particleArray[i].age = 9999; // Robi hack: send them all to recycle immediately        
+        //this.particleArray[i].alive = 1.0;
+        
         this.particleGeometry.vertices[i] = this.particleArray[i].position;
         this.particleMaterial.attributes.customVisible.value[i] = this.particleArray[i].alive;
         this.particleMaterial.attributes.customColor.value[i]   = this.particleArray[i].color;
@@ -360,7 +371,7 @@ ParticleEngine.prototype.initialize = function()
 	
     //this.particleMaterial.blending = this.blendStyle;
     //if ( this.blendStyle != THREE.NormalBlending) 
-        //this.particleMaterial.depthTest = false;
+    //this.particleMaterial.depthTest = false;
 	
     this.particleMesh = new THREE.ParticleSystem( this.particleGeometry, this.particleMaterial );
     this.particleMesh.dynamic = true;
@@ -373,31 +384,21 @@ ParticleEngine.prototype.update = function(dt)
 {
     var recycleIndices = [];
 	
-        
-    var oldestIndex = 0;
-    var maxAge = -1;
             
     // update particle data
     for (var i = 0; i < this.particleCount; i++)
     {
-        if ( this.particleArray[i].alive )
+        if ( this.particleArray[i].alive == 1.0 )
         {
             this.particleArray[i].update(dt);
 
             // check if particle should expire
             // could also use: death by size<0 or alpha<0.
             
-            
-            if(this.particleArray[i].age>maxAge) {
-                maxAge = this.particleArray[i].age;
-                oldestIndex = i;
-            }
-            
             if ( this.particleArray[i].age > this.particleDeathAge ) 
             {
-                this.particleArray[i].alive = 0.0;                                
-                
-                recycleIndices.push(i);
+                this.particleArray[i].alive = 0.0;                
+                //recycleIndices.push(i);
             }
             
             // update particle properties in shader
@@ -406,52 +407,34 @@ ParticleEngine.prototype.update = function(dt)
             this.particleMaterial.attributes.customOpacity.value[i] = this.particleArray[i].opacity;
             this.particleMaterial.attributes.customSize.value[i]    = this.particleArray[i].size;
             this.particleMaterial.attributes.customAngle.value[i]   = this.particleArray[i].angle;
+        } else {
+            recycleIndices.push(i);
         }		
     }
 
-    //Robi: if exceeded budget and no dead particles found, recycle oldest particle
-    if(recycleIndices.length==0) {
-        this.particleArray[oldestIndex].age = this.particleDeathAge + 1;
-        this.particleArray[oldestIndex].alive = 0.0;
-        
-        recycleIndices.push(oldestIndex);
-        
-        var i = oldestIndex;
-        // update particle properties in shader
-        this.particleMaterial.attributes.customVisible.value[i] = this.particleArray[i].alive;
-        this.particleMaterial.attributes.customColor.value[i]   = this.particleArray[i].color;
-        this.particleMaterial.attributes.customOpacity.value[i] = this.particleArray[i].opacity;
-        this.particleMaterial.attributes.customSize.value[i]    = this.particleArray[i].size;
-        this.particleMaterial.attributes.customAngle.value[i]   = this.particleArray[i].angle;
-    }
             
             
     // check if particle emitter is still running
     //if ( !this.emitterAlive ) return;
 
-    // if no particles have died yet, then there are still particles to activate
-    if ( this.emitterAge < this.particleDeathAge )
-    {
-        // determine indices of particles to activate
-        var startIndex = Math.round( this.particlesPerSecond * (this.emitterAge +  0) );
-        var   endIndex = Math.round( this.particlesPerSecond * (this.emitterAge + dt) );
-        if  ( endIndex > this.particleCount ) 
-            endIndex = this.particleCount; 
-			  
-        for (var i = startIndex; i < endIndex; i++) {
-            this.particleArray[i].alive = 1.0;                        
+    
+    //var startIndex = Math.round( this.particlesPerSecond * (this.emitterAge +  0) );
+    //var   endIndex = Math.round( this.particlesPerSecond * (this.emitterAge + dt) );
+    //console.log(dt);	
+                
+    //console.log(this.lastTime, this.emitterSecondInRealTime);
+    if((this.emitterAge+dt) - this.lastTime >= this.emitterSecondInRealTime){
+        this.lastTime = this.emitterAge + dt;
+        for (var k = 0; k < this.particlesPerSecond; k++) {
+            if(recycleIndices.length>0) {
+                var i = recycleIndices.pop();
+                this.particleArray[i] = this.createParticle();            
+                this.particleArray[i].alive = 1.0; // activate right away
+                this.particleGeometry.vertices[i] = this.particleArray[i].position;
+            }
         }
     }
-
-    // if any particles have died while the emitter is still running, we imediately recycle them
-    for (var j = 0; j < recycleIndices.length; j++)
-    {
-        var i = recycleIndices[j];
-        this.particleArray[i] = this.createParticle();
-        this.particleArray[i].alive = 1.0; // activate right away
-        this.particleGeometry.vertices[i] = this.particleArray[i].position;
-    }
-
+    
 
 
     // stop emitter?

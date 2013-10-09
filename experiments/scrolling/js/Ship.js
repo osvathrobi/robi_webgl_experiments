@@ -38,6 +38,10 @@ var Ship = {
         
         engines[0].positionBase.set( Ship.ship.position.x - 3, Ship.ship.position.y, Ship.ship.position.z - 5 );
         engines[1].positionBase.set( Ship.ship.position.x + 3, Ship.ship.position.y, Ship.ship.position.z - 5 );
+        
+        engines[2].positionBase.set( Ship.ship.position.x - 12 + (Ship.rotZ * 0.1), (-Ship.rotZ * 18) + Ship.ship.position.y, Ship.ship.position.z - 3 );
+        engines[3].positionBase.set( Ship.ship.position.x + 12 - (Ship.rotZ * 0.1), (Ship.rotZ * 18) + Ship.ship.position.y, Ship.ship.position.z - 3 );
+        
     },
     
     moove : function(x,y) {

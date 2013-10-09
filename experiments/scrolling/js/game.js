@@ -63,32 +63,39 @@ function init() {
     
 
     var effect = new Effects();
-    effect.smoke.velocityBase = new THREE.Vector3( -20, 0,150 );
+    effect.smoke.velocityBase = new THREE.Vector3( -20, 0,200 );
     var engine = new ParticleEngine();
     engine.setValues( effect.smoke);
     engine.initialize();
     engines.push(engine);
     
-    var effect = new Effects();
-    effect.smoke.velocityBase = new THREE.Vector3( 20, 0,150 );
-    var engine = new ParticleEngine();
-    engine.setValues( effect.smoke );
-    engine.initialize();
-    engines.push(engine);
+    var effect2 = new Effects();
+    effect2.smoke.velocityBase = new THREE.Vector3( 20, 0,200 );
+    var engine2 = new ParticleEngine();
+    engine2.setValues( effect2.smoke );
+    engine2.initialize();
+    engines.push(engine2);
     
-    /*
-    var effect = new Effects();
-    var engine = new ParticleEngine();
-    engine.setValues( effect.clouds );
-    engine.initialize();
-    engines.push(engine);
-    */
+    
+    var effect3 = new Effects();
+    var engine3 = new ParticleEngine();
+    engine3.setValues( effect3.bullets );
+    engine3.initialize();
+    engines.push(engine3);
+    
+    var effect4 = new Effects();
+    var engine4 = new ParticleEngine();
+    engine4.setValues( effect4.bullets );
+    engine4.initialize();
+    engines.push(engine4);
+    
    
+    console.log(engines);
     
     renderer = new THREE.WebGLRenderer({
         //antialias':true,
         //alpha: false
-         //clearAlpha: 1
+        //clearAlpha: 1
         });
     
     renderer.setClearColor( 0x000000, 1 );
@@ -133,7 +140,7 @@ function animate() {
 
     var dt = clock.getDelta();
     for(var i=0;i<engines.length;i++) {
-        engines[i].update( dt * 0.5 );
+        engines[i].update( dt * 0.5);
     }
     
     render();

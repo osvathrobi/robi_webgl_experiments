@@ -32,7 +32,7 @@ var Terrain = {
     
         var texture_cloud = THREE.ImageUtils.loadTexture( "textures/cloud3.png" );
         texture_cloud.wrapS = texture_cloud.wrapT = THREE.RepeatWrapping;
-        texture_cloud.repeat.set( 2,2 );
+        texture_cloud.repeat.set( 2.5,2 );
         
         var texture_building = THREE.ImageUtils.loadTexture( "textures/building2.jpg" );
         texture_building.wrapS = texture_building.wrapT = THREE.RepeatWrapping;
