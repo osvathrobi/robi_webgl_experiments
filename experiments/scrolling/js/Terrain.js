@@ -7,14 +7,9 @@ var Terrain = {
     wp : 0,
     
     init : function(scene) {
-        
-        var geometry = new THREE.PlaneGeometry( 2000, 2000, worldWidth - 1, worldDepth - 1 );
-        geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
-        geometry.dynamic = true;
-        geometry.computeFaceNormals();
-        geometry.computeVertexNormals();
-
-        for(var i=0;i<4;i++) {
+        var worldWidth = 1;
+        var worldDepth = 1;
+        for(var i=0;i<3;i++) {
             geometry = new THREE.PlaneGeometry( 2000, 2000, worldWidth - 1, worldDepth - 1 );
             geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
             geometry.dynamic = true;
@@ -22,15 +17,22 @@ var Terrain = {
             geometry.computeVertexNormals();
             Terrain.geometries.push(geometry);
         }
+        
+        geometry = new THREE.PlaneGeometry( 2000, 2000, 1, 1 );
+        geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
+        geometry.dynamic = true;
+        geometry.computeFaceNormals();
+        geometry.computeVertexNormals();
+        Terrain.geometries.push(geometry);
 
         //var texture = THREE.ImageUtils.loadTexture( "../../threejs/examples/textures/water.jpg" );
         var texture = THREE.ImageUtils.loadTexture( "textures/dirt_sc.jpg" );
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
         texture.repeat.set( 8,8 );
     
-        var texture_cloud = THREE.ImageUtils.loadTexture( "textures/cloud3.jpg" );
+        var texture_cloud = THREE.ImageUtils.loadTexture( "textures/cloud3.png" );
         texture_cloud.wrapS = texture_cloud.wrapT = THREE.RepeatWrapping;
-        texture_cloud.repeat.set( 2.4,2 );
+        texture_cloud.repeat.set( 2,2 );
         
         var texture_building = THREE.ImageUtils.loadTexture( "textures/building2.jpg" );
         texture_building.wrapS = texture_building.wrapT = THREE.RepeatWrapping;
@@ -41,7 +43,7 @@ var Terrain = {
         var mesh;
         
         material = new THREE.MeshBasicMaterial( {
-            color: 0x83BAE1, 
+            color: 0xffffff, 
             map: texture, 
             wireframe:false
         } );  
@@ -50,7 +52,7 @@ var Terrain = {
         scene.add(mesh);
     
         material = new THREE.MeshBasicMaterial( {
-            color: 0x83BAE1, 
+            color: 0xffffff, 
             map: texture, 
             wireframe:false
         } );                                                          
@@ -60,7 +62,7 @@ var Terrain = {
         //mesh.position.set(0, -200, 0);
     
         material = new THREE.MeshBasicMaterial( {
-            color: 0x83BAE1, 
+            color: 0xffffff, 
             map: texture, 
             wireframe:false
         } );                                                          
@@ -73,25 +75,35 @@ var Terrain = {
         // CLOUDS        
         
         material_cloud = new THREE.MeshBasicMaterial( {
-            color: 0xcccccc, 
+            color: 0xffffff, 
             map: texture_cloud, 
             wireframe:false,
             transparent : true,
-            //opacity:0.5,
-            blending : THREE['AdditiveBlending'],
-            //depthTest: true,
-            //depthWrite : true, 
-            //  combine : THREE.MixOperation
+            opacity:0.9,
+            blending : 1,
+            depthTest: true,
+            depthWrite : true, 
+        //alphaTest: 0.5
+        //  combine : THREE.MixOperation
         } );                                                          
         mesh = new THREE.Mesh( Terrain.geometries[3], material_cloud );
         Terrain.meshes.push(mesh);
-        //scene.add(mesh);
+        scene.add(mesh);
         mesh = new THREE.Mesh( Terrain.geometries[3], material_cloud );
         Terrain.meshes.push(mesh);
-        //scene.add(mesh);
+        scene.add(mesh);
         mesh = new THREE.Mesh( Terrain.geometries[3], material_cloud );
         Terrain.meshes.push(mesh);
-        //scene.add(mesh);
+        scene.add(mesh);
+        mesh = new THREE.Mesh( Terrain.geometries[3], material_cloud );
+        Terrain.meshes.push(mesh);
+        scene.add(mesh);
+        mesh = new THREE.Mesh( Terrain.geometries[3], material_cloud );
+        Terrain.meshes.push(mesh);
+        scene.add(mesh);
+        mesh = new THREE.Mesh( Terrain.geometries[3], material_cloud );
+        Terrain.meshes.push(mesh);
+        scene.add(mesh);
         
         // Buildings
         var j;
@@ -113,13 +125,16 @@ var Terrain = {
         Terrain.meshes[2].position.set(0, 0, -4000);
         
         // Position clouds
-        Terrain.meshes[3].position.set(0, 100, 0);
-        Terrain.meshes[4].position.set(0, 100, -2000);
-        Terrain.meshes[5].position.set(0, 100, -4000);
+        Terrain.meshes[3].position.set(200, 80, 0);
+        Terrain.meshes[4].position.set(200, 80, -2000);
+        Terrain.meshes[5].position.set(200, 80, -4000);
+        Terrain.meshes[6].position.set(-200, 90, 500);
+        Terrain.meshes[7].position.set(-200, 90, -1500);
+        Terrain.meshes[8].position.set(-200, 90, -3500);
         
         // position buildings
         for(j=0;j<120;j++) {
-            Terrain.meshes[6 + j].position.set(-1000 + (Math.random() * 2000), 0, Math.random() * (-6000));
+            Terrain.meshes[9 + j].position.set(-1000 + (Math.random() * 2000), 0, Math.random() * (-6000));
         }
         
         
@@ -200,7 +215,10 @@ var Terrain = {
             if( (i>=3)&&(i<6) ) {
                 speed = 2.2;
             }
-                
+            if( (i>=6)&&(i<9) ) {
+                speed = 2.9;
+            }
+            
             if(Terrain.meshes[i].position.z>2000) {                
                 
                 Terrain.meshes[i].position.z = -4000 + (speed);

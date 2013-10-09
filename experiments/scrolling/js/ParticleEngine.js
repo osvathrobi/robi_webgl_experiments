@@ -206,7 +206,7 @@ function ParticleEngine()
     this.emitterDeathAge = 60; // time (seconds) at which to stop creating particles.
 	
     // How many particles could be active at any time?
-    this.particleCount = this.particlesPerSecond * Math.min( this.particleDeathAge, this.emitterDeathAge );
+    this.particleCount = -1; 
 
     //////////////
     // THREE.JS //
@@ -214,45 +214,7 @@ function ParticleEngine()
 	
     this.particleGeometry = new THREE.Geometry();
     this.particleTexture  = null;
-    this.particleMaterial = new THREE.ShaderMaterial( 
-    {
-        uniforms: 
-        {
-            texture:   {
-                type: "t", 
-                value: this.particleTexture
-            },
-        },
-        attributes:     
-        {
-            customVisible:	{
-                type: 'f',  
-                value: []
-            },
-            customAngle:	{
-                type: 'f',  
-                value: []
-            },
-            customSize:		{
-                type: 'f',  
-                value: []
-            },
-            customColor:	{
-                type: 'c',  
-                value: []
-            },
-            customOpacity:	{
-                type: 'f',  
-                value: []
-            }
-        },
-        vertexShader:   particleVertexShader,
-        fragmentShader: particleFragmentShader,
-        transparent: true, // alphaTest: 0.5,  // if having transparency issues, try including: alphaTest: 0.5, 
-        blending: THREE.NormalBlending, 
-        depthTest: true,
-    //depthWrite : true
-    });
+    this.particleMaterial = new THREE.ShaderMaterial( );
     this.particleMesh = new THREE.Mesh();
 }
 	
@@ -277,7 +239,7 @@ ParticleEngine.prototype.setValues = function( parameters )
     this.particleArray = [];
     this.emitterAge      = 0.0;
     this.emitterAlive    = true;
-    this.particleCount = this.particlesPerSecond * Math.min( this.particleDeathAge, this.emitterDeathAge );
+    this.particleCount = this.particleBudget;
 	
     this.particleGeometry = new THREE.Geometry();
     this.particleMaterial = new THREE.ShaderMaterial( 
@@ -315,9 +277,10 @@ ParticleEngine.prototype.setValues = function( parameters )
         vertexShader:   particleVertexShader,
         fragmentShader: particleFragmentShader,
         transparent: true,  
-        alphaTest: 0.5, // if having transparency issues, try including: alphaTest: 0.5, 
+        //alphaTest: 0.5, // if having transparency issues, try including: alphaTest: 0.5, 
         blending: THREE.NormalBlending, 
-        depthTest: true
+        depthTest: true,
+        depthWrite: false
     });
     this.particleMesh = new THREE.ParticleSystem();
 }
@@ -395,9 +358,9 @@ ParticleEngine.prototype.initialize = function()
         this.particleMaterial.attributes.customAngle.value[i]   = this.particleArray[i].angle;
     }
 	
-    this.particleMaterial.blending = this.blendStyle;
-    if ( this.blendStyle != THREE.NormalBlending) 
-        this.particleMaterial.depthTest = false;
+    //this.particleMaterial.blending = this.blendStyle;
+    //if ( this.blendStyle != THREE.NormalBlending) 
+        //this.particleMaterial.depthTest = false;
 	
     this.particleMesh = new THREE.ParticleSystem( this.particleGeometry, this.particleMaterial );
     this.particleMesh.dynamic = true;
@@ -410,6 +373,10 @@ ParticleEngine.prototype.update = function(dt)
 {
     var recycleIndices = [];
 	
+        
+    var oldestIndex = 0;
+    var maxAge = -1;
+            
     // update particle data
     for (var i = 0; i < this.particleCount; i++)
     {
@@ -419,11 +386,20 @@ ParticleEngine.prototype.update = function(dt)
 
             // check if particle should expire
             // could also use: death by size<0 or alpha<0.
+            
+            
+            if(this.particleArray[i].age>maxAge) {
+                maxAge = this.particleArray[i].age;
+                oldestIndex = i;
+            }
+            
             if ( this.particleArray[i].age > this.particleDeathAge ) 
             {
                 this.particleArray[i].alive = 0.0;                                
+                
                 recycleIndices.push(i);
             }
+            
             // update particle properties in shader
             this.particleMaterial.attributes.customVisible.value[i] = this.particleArray[i].alive;
             this.particleMaterial.attributes.customColor.value[i]   = this.particleArray[i].color;
@@ -433,6 +409,23 @@ ParticleEngine.prototype.update = function(dt)
         }		
     }
 
+    //Robi: if exceeded budget and no dead particles found, recycle oldest particle
+    if(recycleIndices.length==0) {
+        this.particleArray[oldestIndex].age = this.particleDeathAge + 1;
+        this.particleArray[oldestIndex].alive = 0.0;
+        
+        recycleIndices.push(oldestIndex);
+        
+        var i = oldestIndex;
+        // update particle properties in shader
+        this.particleMaterial.attributes.customVisible.value[i] = this.particleArray[i].alive;
+        this.particleMaterial.attributes.customColor.value[i]   = this.particleArray[i].color;
+        this.particleMaterial.attributes.customOpacity.value[i] = this.particleArray[i].opacity;
+        this.particleMaterial.attributes.customSize.value[i]    = this.particleArray[i].size;
+        this.particleMaterial.attributes.customAngle.value[i]   = this.particleArray[i].angle;
+    }
+            
+            
     // check if particle emitter is still running
     //if ( !this.emitterAlive ) return;
 
@@ -458,6 +451,8 @@ ParticleEngine.prototype.update = function(dt)
         this.particleArray[i].alive = 1.0; // activate right away
         this.particleGeometry.vertices[i] = this.particleArray[i].position;
     }
+
+
 
     // stop emitter?
     this.emitterAge += dt;

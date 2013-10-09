@@ -36,8 +36,8 @@ var Ship = {
             Ship.rotZ += 0.04;
         }
         
-        engine[0].positionBase.set( Ship.ship.position.x - 3, Ship.ship.position.y, Ship.ship.position.z - 5 );
-        engine[1].positionBase.set( Ship.ship.position.x + 3, Ship.ship.position.y, Ship.ship.position.z - 5 );
+        engines[0].positionBase.set( Ship.ship.position.x - 3, Ship.ship.position.y, Ship.ship.position.z - 5 );
+        engines[1].positionBase.set( Ship.ship.position.x + 3, Ship.ship.position.y, Ship.ship.position.z - 5 );
     },
     
     moove : function(x,y) {
@@ -51,18 +51,18 @@ var Ship = {
     },
     
     panRight : function() {
-        Ship.ship.position.x += 1.0;
+        Ship.ship.position.x += 2.0;
         
         if(Ship.rotZ>-1.1)
             Ship.rotZ-=0.08;
     },
     
     panForward : function() {
-        Ship.ship.position.z -= 1.0;        
+        Ship.ship.position.z -= 2.0;        
     },
     
     panBack : function() {
-        Ship.ship.position.z += 1.0;
+        Ship.ship.position.z += 2.0;
     },
     
     elevUp : function() {

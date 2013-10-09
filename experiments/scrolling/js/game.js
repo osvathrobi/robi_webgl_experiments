@@ -18,7 +18,7 @@ var worldWidth = 16, worldDepth = 16,
 worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
 
 var clock = new THREE.Clock();
-var engine = [];
+var engines = [];
        
 init();
 animate();
@@ -57,27 +57,43 @@ function init() {
     } );
 
 
-    var effect = new Effects();
-    effect.smoke.velocityBase = new THREE.Vector3( -20, 0,150 );
-    engine[0] = new ParticleEngine();
-    engine[0].setValues( effect.smoke);
-    engine[0].initialize();
-    
-    var effect = new Effects();
-    effect.smoke.velocityBase = new THREE.Vector3( 20, 0,150 );
-    engine[1] = new ParticleEngine();
-    engine[1].setValues( effect.smoke );
-    engine[1].initialize();
-    
+
     Terrain.init(scene);
     Ship.init(scene);
     
+
+    var effect = new Effects();
+    effect.smoke.velocityBase = new THREE.Vector3( -20, 0,150 );
+    var engine = new ParticleEngine();
+    engine.setValues( effect.smoke);
+    engine.initialize();
+    engines.push(engine);
+    
+    var effect = new Effects();
+    effect.smoke.velocityBase = new THREE.Vector3( 20, 0,150 );
+    var engine = new ParticleEngine();
+    engine.setValues( effect.smoke );
+    engine.initialize();
+    engines.push(engine);
+    
+    /*
+    var effect = new Effects();
+    var engine = new ParticleEngine();
+    engine.setValues( effect.clouds );
+    engine.initialize();
+    engines.push(engine);
+    */
+   
+    
     renderer = new THREE.WebGLRenderer({
-        //'antialias':true
+        //antialias':true,
+        //alpha: false
+         //clearAlpha: 1
         });
     
     renderer.setClearColor( 0x000000, 1 );
     renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.sortObjects = false;
     
     container.appendChild( renderer.domElement );
 
@@ -116,8 +132,8 @@ function animate() {
     Ship.updateBeforeRender();
 
     var dt = clock.getDelta();
-    for(var i=0;i<engine.length;i++) {
-        engine[i].update( dt * 0.5 );
+    for(var i=0;i<engines.length;i++) {
+        engines[i].update( dt * 0.5 );
     }
     
     render();
