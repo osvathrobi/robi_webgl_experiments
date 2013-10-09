@@ -9,7 +9,7 @@ var Ship = {
         loader.addEventListener( 'load', function ( event ) {
             console.log(event);
             var object = event.content;         
-            object.position.set(0, 180, 100);
+            object.position.set(0, 120, 100);
             object.scale.set(5.0,5.0,5.0);
             scene.add( object );
             
@@ -39,8 +39,9 @@ var Ship = {
         engines[0].positionBase.set( Ship.ship.position.x - 3, Ship.ship.position.y, Ship.ship.position.z - 5 );
         engines[1].positionBase.set( Ship.ship.position.x + 3, Ship.ship.position.y, Ship.ship.position.z - 5 );
         
-        engines[2].positionBase.set( Ship.ship.position.x - 12 + (Ship.rotZ * 0.1), (-Ship.rotZ * 18) + Ship.ship.position.y, Ship.ship.position.z - 3 );
-        engines[3].positionBase.set( Ship.ship.position.x + 12 - (Ship.rotZ * 0.1), (Ship.rotZ * 18) + Ship.ship.position.y, Ship.ship.position.z - 3 );
+        var vec3 = new THREE.Vector3( 18.0 * Math.cos(Ship.rotZ), 12.0 * Math.sin(Ship.rotZ), 0 );
+        engines[2].positionBase.set( Ship.ship.position.x  - vec3.x, - vec3.y + Ship.ship.position.y, Ship.ship.position.z - 3 );
+        engines[3].positionBase.set( Ship.ship.position.x  + vec3.x, + vec3.y + Ship.ship.position.y, Ship.ship.position.z - 3 );
         
     },
     

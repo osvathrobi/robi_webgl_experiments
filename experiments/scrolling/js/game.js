@@ -60,6 +60,7 @@ function init() {
 
     Terrain.init(scene);
     Ship.init(scene);
+    Enemy.init(scene);
     
 
     var effect = new Effects();
@@ -137,6 +138,7 @@ function animate() {
 
     Terrain.updateBeforeRender();
     Ship.updateBeforeRender();
+    Enemy.updateBeforeRender();
 
     var dt = clock.getDelta();
     for(var i=0;i<engines.length;i++) {
