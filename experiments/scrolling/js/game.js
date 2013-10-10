@@ -14,6 +14,8 @@ var projector, mouse = {
     y: 0
 };
 
+var isDragging = false;
+
 var worldWidth = 16, worldDepth = 16,
 worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
 
@@ -117,10 +119,58 @@ function init() {
                                 
     window.addEventListener( 'resize', onWindowResize, false );
     
+    window.addEventListener( 'mousemove', onWindowMouseMove, false );
+    window.addEventListener( 'mousedown', onWindowStartDrag, false );
+    window.addEventListener( 'mouseup', onWindowStopDrag, false );
+    
+    window.addEventListener( 'touchmove', onWindowMouseMove, false );
+    window.addEventListener( 'touchstart', onWindowStartDrag, false );
+    window.addEventListener( 'touchend', onWindowStopDrag, false );
+    
+    //window.addEventListener( 'click', onWindowClick, false );
+    
     Input.init();
     
 }
 
+function onWindowStartDrag() {
+    isDragging = true;
+}
+
+function onWindowStopDrag() {
+    isDragging = false;
+}
+
+function onWindowMouseMove(event) {
+    if(isDragging) {
+        var planeZ = new THREE.Plane(new THREE.Vector3(0, 1, 0), -120);
+        var mv = new THREE.Vector3(
+            (event.clientX / window.innerWidth) * 2 - 1,
+            -(event.clientY / window.innerHeight) * 2 + 1,
+            0.5 );
+        var raycaster = projector.pickingRay(mv, camera);
+        var pos = raycaster.ray.intersectPlane(planeZ);
+        //console.log("x: " + pos.x + ", y: " + pos.y);
+    
+        Ship.moveTo(pos);
+    }
+}
+
+
+function onWindowClick(event) {
+    isDragging = true;
+    
+    var planeZ = new THREE.Plane(new THREE.Vector3(0, 1, 0), -120);
+    var mv = new THREE.Vector3(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        -(event.clientY / window.innerHeight) * 2 + 1,
+        0.5 );
+    var raycaster = projector.pickingRay(mv, camera);
+    var pos = raycaster.ray.intersectPlane(planeZ);
+    //console.log("x: " + pos.x + ", y: " + pos.y);
+    
+    Ship.moveTo(pos);
+}
 
 function onWindowResize() {
 

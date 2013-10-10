@@ -1,6 +1,6 @@
 var Enemy = {
     enemies : [],
-    enemyBudget : 40,
+    enemyBudget : 20,
     time : 0,
     wp:0,
     zRange : 300,
@@ -24,7 +24,7 @@ var Enemy = {
         
         cobject.animateHit = false;
         cobject.animateHitCounter = 0;
-        cobject.HP = 5;
+        cobject.HP = 8;
         cobject.animateDeath = false;
     },
     
