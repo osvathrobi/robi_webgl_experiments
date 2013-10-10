@@ -105,6 +105,13 @@ function Particle()
 			
     this.age   = 0;
     this.alive = 0; // use float instead of boolean for shader purposes	
+    
+    this.collisionRect = {
+        left:   0,
+        top:    0,
+        right:  0,
+        bottom: 0
+    }
 }
 
 Particle.prototype.update = function(dt)
@@ -112,6 +119,16 @@ Particle.prototype.update = function(dt)
     this.position.add( this.velocity.clone().multiplyScalar(dt) );
     this.velocity.add( this.acceleration.clone().multiplyScalar(dt) );
 	
+    this.collisionRect = {
+        left:   this.position.x - (this.size / 2),
+        top:    this.position.z - (this.size / 2),
+        right:  this.position.x + (this.size),
+        bottom: this.position.z + (this.size)
+    }
+    
+
+    //console.log(this.collisionRect);
+        
     // convert from degrees to radians: 0.01745329251 = Math.PI/180
     this.angle         += this.angleVelocity     * 0.01745329251 * dt;
     this.angleVelocity += this.angleAcceleration * 0.01745329251 * dt;
@@ -300,16 +317,21 @@ ParticleEngine.prototype.randomVector3 = function(base, spread)
 }
 
 
-ParticleEngine.prototype.createParticle = function()
+ParticleEngine.prototype.createParticle = function(recycleParticle)
 {
-    var particle = new Particle();
-
+    var particle;
+    
+    if(recycleParticle) {
+        particle = recycleParticle;
+    } else {
+        particle = new Particle();
+    }
 
     // attach tweens to particles
     particle.sizeTween    = this.sizeTween;
     particle.colorTween   = this.colorTween;
-    particle.opacityTween = this.opacityTween;
-    
+    particle.opacityTween = this.opacityTween;    
+        
     if (this.positionStyle == Type.CUBE)            
         particle.position = this.randomVector3( this.positionBase, this.positionSpread ); 
     if (this.positionStyle == Type.SPHERE)
@@ -348,6 +370,14 @@ ParticleEngine.prototype.createParticle = function()
     particle.age   = 0;
     particle.alive = 0; // particles initialize as inactive
 	
+        
+    particle.collisionRect = {
+        left:   particle.position.x - (particle.size / 2),
+        top:    particle.position.z - (particle.size / 2),
+        right:  particle.position.x + (particle.size),
+        bottom: particle.position.z + (particle.size)
+    }
+    
     return particle;
 }
 
@@ -391,6 +421,10 @@ ParticleEngine.prototype.update = function(dt)
         if ( this.particleArray[i].alive == 1.0 )
         {
             this.particleArray[i].update(dt);
+            
+            //this.particleArray[0].collisionRect = 666;
+            
+            //console.log(this.particleArray[i].collisionRect);
 
             // check if particle should expire
             // could also use: death by size<0 or alpha<0.
@@ -398,9 +432,9 @@ ParticleEngine.prototype.update = function(dt)
             if ( this.particleArray[i].age > this.particleDeathAge ) 
             {
                 this.particleArray[i].alive = 0.0;                
-                //recycleIndices.push(i);
             }
-            
+                        
+
             // update particle properties in shader
             this.particleMaterial.attributes.customVisible.value[i] = this.particleArray[i].alive;
             this.particleMaterial.attributes.customColor.value[i]   = this.particleArray[i].color;
@@ -427,19 +461,18 @@ ParticleEngine.prototype.update = function(dt)
         this.lastTime = this.emitterAge + dt;
         for (var k = 0; k < this.particlesPerSecond; k++) {
             if(recycleIndices.length>0) {
-                var i = recycleIndices.pop();
-                this.particleArray[i] = this.createParticle();            
+                var i = recycleIndices.pop();                
+                this.particleArray[i] = this.createParticle(this.particleArray[i]);            
                 this.particleArray[i].alive = 1.0; // activate right away
-                this.particleGeometry.vertices[i] = this.particleArray[i].position;
+                this.particleGeometry.vertices[i] = this.particleArray[i].position;                
+                
             }
         }
     }
     
-
-
     // stop emitter?
     this.emitterAge += dt;
-//if ( this.emitterAge > this.emitterDeathAge )  this.emitterAlive = false;
+    
 }
 
 ParticleEngine.prototype.destroy = function()

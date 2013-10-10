@@ -60,7 +60,9 @@ function init() {
 
     Terrain.init(scene);
     Ship.init(scene);
-    Enemy.init(scene);
+    Enemy.init(scene, function() {
+        Collision.registerEnemies(Enemy.enemies);
+    });
     
 
     var effect = new Effects();
@@ -90,8 +92,11 @@ function init() {
     engine4.initialize();
     engines.push(engine4);
     
-   
-    console.log(engines);
+    // collision of bullet / enemy
+    Collision.registerBullets(engine3.particleArray);
+    Collision.registerBullets(engine4.particleArray);    
+    
+    
     
     renderer = new THREE.WebGLRenderer({
         //antialias':true,
@@ -139,11 +144,13 @@ function animate() {
     Terrain.updateBeforeRender();
     Ship.updateBeforeRender();
     Enemy.updateBeforeRender();
-
+    
     var dt = clock.getDelta();
     for(var i=0;i<engines.length;i++) {
         engines[i].update( dt * 0.5);
     }
+    
+    Collision.runBulletEnemyCollision();
     
     render();
     stats.update();
