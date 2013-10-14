@@ -6,7 +6,8 @@ A collection of experiments as I learn to use ThreeJS and WebGl.
 
 Experiments:
   
-  experiments/scrolling - (Shmup concept): http://nerdcore.eu/experiments/scrolling/index.html
+  experiments/scrolling - Shoot'em up concept:
+    http://nerdcore.eu/experiments/scrolling/index.html
   
   
 
