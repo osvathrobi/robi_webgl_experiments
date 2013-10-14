@@ -3,10 +3,47 @@ var Terrain = {
     meshes : [],
     textures : [],
     geometries : [],
-    
+    pobjects : [],
     wp : 0,
     
     init : function(scene) {
+        var loader = new THREE.OBJMTLLoader();
+        
+        loader.addEventListener( 'load', function ( event ) {
+            console.log(event);
+            event.content.scale.set(10.0,10.0,10.0);
+            //Terrain.pobjects.push(event.content);
+            Terrain.addDoodads(scene, event.content, event.extra);            
+        });
+        
+        loader.load( 'meshes/barrel/barrel.obj', 'meshes/barrel/barrel.mtl', 120);
+        loader.load( 'meshes/corn/corn.obj', 'meshes/corn/corn.mtl', 120);
+        loader.load( 'meshes/car_scrap/car_scrap.obj', 'meshes/car_scrap/car_scrap.mtl', 10);
+        
+        
+        Terrain.initLoaded(scene);
+    },
+    
+    addDoodads : function(scene, pobject, extra) {
+        // Buildings
+        var j;    
+        var indexStart = Terrain.meshes.length;
+        var nrDoodads = extra;
+        
+        for(j=0;j<nrDoodads;j++) {
+            var mesh = pobject.clone();
+            mesh.rotation.set(0.0, Math.random() * 360.0, 0.0 );
+            Terrain.meshes.push(mesh);
+            scene.add( mesh );                                
+        }
+        
+        // position buildings
+        for(j=indexStart;j<indexStart + nrDoodads;j++) {
+            Terrain.meshes[j].position.set(-1000 + (Math.random() * 2000), 0, Math.random() * (-1000));
+        }
+    },
+    
+    initLoaded : function(scene) {
         var worldWidth = 1;
         var worldDepth = 1;
         for(var i=0;i<3;i++) {
@@ -105,19 +142,7 @@ var Terrain = {
         Terrain.meshes.push(mesh);
         scene.add(mesh);
         
-        // Buildings
-        var j;
-        material = new THREE.MeshBasicMaterial( {
-            color: 0xcccccc, 
-            map: texture_building, 
-            wireframe:false
-        } );                  
-        for(j=0;j<120;j++) {
-            geometry = new THREE.CubeGeometry( 30, 90, 30 );
-            mesh = new THREE.Mesh( geometry, material );
-            Terrain.meshes.push(mesh);
-            scene.add( mesh );                                
-        }
+
         
         // Position terrain
         Terrain.meshes[0].position.set(0, 0,0);
@@ -132,15 +157,6 @@ var Terrain = {
         Terrain.meshes[7].position.set(-200, 90, -1500);
         Terrain.meshes[8].position.set(-200, 90, -3500);
         
-        // position buildings
-        for(j=0;j<120;j++) {
-            Terrain.meshes[9 + j].position.set(-1000 + (Math.random() * 2000), 0, Math.random() * (-6000));
-        }
-        
-        
-        
-        
-                                
                                 
     },
     
@@ -169,38 +185,6 @@ var Terrain = {
         return m;
     },
 
-    generateHeight : function( width, height, offset ) {
-
-        var size = width * height, data = new Float32Array( size ),
-        perlin = new ImprovedNoise(), quality = 4, z = 0;// Math.random() * 100;
-
-        for ( var i = 0; i < size; i ++ ) {
-
-            data[ i ] = 0
-
-        }
-
-        for ( var j = 0; j < 3; j ++ ) {
-        
-            var cn = 0;
-        
-            for ( var y = 0; y < height; y ++ ) {
-                for ( var x = 0; x < width; x ++ ) {
-    
-                    data[ cn ] += perlin.noise(x / quality, (y+(offset)) / quality, z) * quality * 1.75;
-                    cn++;
-                }
-
-            }
-
-            quality *= 5;
-
-        }
-
-        return data;
-
-    },
-    
     time : 0,
     
     updateBeforeRender : function() {
@@ -219,12 +203,17 @@ var Terrain = {
                 speed = 2.9;
             }
             
-            if(Terrain.meshes[i].position.z>2000) {                
                 
-                Terrain.meshes[i].position.z = -4000 + (speed);
-                //var m = reshuffle(i);
-                Terrain.wp++;
+            if(i<9) {
+                if(Terrain.meshes[i].position.z>2000) {                
+                    Terrain.meshes[i].position.z = -4000 + (speed);
+                }
+            } else {
+                if(Terrain.meshes[i].position.z>200) { 
+                    Terrain.meshes[i].position.z = -1000 + (speed);
+                }
             }
+             
         
             Terrain.meshes[i].position.set(Terrain.meshes[i].position.x, Terrain.meshes[i].position.y, Terrain.meshes[i].position.z + speed);
                 

@@ -30,7 +30,7 @@ THREE.OBJMTLLoader.prototype = {
 	 * @param options - Options on how to interpret the material (see THREE.MTLLoader.MaterialCreator )
 	 */
 
-    load: function ( url, mtlfileurl, options ) {
+    load: function ( url, mtlfileurl, extra, options ) {
 
         var scope = this;
         var xhr = new XMLHttpRequest();
@@ -153,7 +153,8 @@ THREE.OBJMTLLoader.prototype = {
 
                 scope.dispatchEvent( {
                     type: 'load', 
-                    content: obj3d
+                    content: obj3d,
+                    'extra': extra
                 } );
             }
 

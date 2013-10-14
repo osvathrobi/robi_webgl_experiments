@@ -104,7 +104,8 @@ function init() {
         //antialias':true,
         //alpha: false
         //clearAlpha: 1
-        });
+        premultipliedAlpha : true
+    });
     
     renderer.setClearColor( 0x000000, 1 );
     renderer.setSize( window.innerWidth, window.innerHeight );

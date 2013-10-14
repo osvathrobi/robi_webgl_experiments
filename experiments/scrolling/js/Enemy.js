@@ -1,6 +1,6 @@
 var Enemy = {
     enemies : [],
-    enemyBudget : 20,
+    enemyBudget : 10,
     time : 0,
     wp:0,
     zRange : 300,
@@ -24,7 +24,7 @@ var Enemy = {
         
         cobject.animateHit = false;
         cobject.animateHitCounter = 0;
-        cobject.HP = 8;
+        cobject.HP = 10;
         cobject.animateDeath = false;
     },
     
@@ -39,13 +39,35 @@ var Enemy = {
                 
                 var cobject = object.clone();    
                 cobject.children[0].children[0].material = cobject.children[0].children[0].material.clone();
+                //cobject.children[0].material = cobject.children[0].material.clone();
                 
+                //var newmat = new THREE.MeshBasicMaterial();
+                //newmat.map = cobject.children[0].material.map;
+                
+                //cobject.children[0].material = newmat;
+                
+                //cobject.children[0].material.transparent = true;
+                //cobject.children[0].material.blending = 1; 
+                //cobject.children[0].material.alphaTest = 0.5; 
+                //cobject.children[0].material.depthTest = true;
+                //cobject.children[0].material.depthWrite = true;
+        
+                //cobject.children[0].material.opacity  = 1.0;
+        
+                //cobject.children[0].material.blending = THREE.CustomBlending;
+                //cobject.children[0].material.blendSrc = THREE.SrcColorFactor;
+                //cobject.children[0].material.blendDst = THREE.OneMinusSrcColorFactor;
+                //cobject.children[0].material.blendSrc = THREE.SrcAlphaFactor;
+                //cobject.children[0].material.blendDst = THREE.OneMinusSrcAlphaFactor;
+                //cobject.children[0].material.blendEquation = THREE.AddEquation;
+    
                 cobject.scale.set(2.0,2.0,2.0);
                 
                 Enemy.getNewEnemy(cobject);
                 
                 Enemy.enemies.push(cobject);
                 
+                //console.log(cobject);
                 scene.add( cobject );                   
             }
             
@@ -75,7 +97,7 @@ var Enemy = {
                 if(Math.abs(direction.x - Enemy.enemies[i].position.x) > 10) {
                     Enemy.enemies[i].position.x-=1.5;
                     
-                    if(Enemy.enemies[i].rotZ<1.1)
+                    if(Enemy.enemies[i].rotZ<0.6)
                         Enemy.enemies[i].rotZ+=0.05;
                 } else {
                     if(Enemy.enemies[i].rotZ>0)
@@ -89,7 +111,7 @@ var Enemy = {
                 if(Math.abs(direction.x - Enemy.enemies[i].position.x) > 10) {
                     Enemy.enemies[i].position.x+=1.5;
                                 
-                    if(Enemy.enemies[i].rotZ>-1.1)
+                    if(Enemy.enemies[i].rotZ>-0.6)
                         Enemy.enemies[i].rotZ-=0.05;
                 } else {
                     if(Enemy.enemies[i].rotZ<0)
@@ -127,8 +149,10 @@ var Enemy = {
             if(Enemy.enemies[i].animateDeath) {
                 Enemy.enemies[i].position.y-=1.8;
                 var a = Enemy.time;
-                if(i%2==0) { a=-a; }
-                Enemy.enemies[i].rotation.set(0.0,a * 6.8,a * 6.8);
+                if(i%2==0) {
+                    a=-a;
+                }
+                Enemy.enemies[i].rotation.set(0.0,a * 6.8,0.0);
                 
                 if(Enemy.enemies[i].position.y < 0) {
                     Enemy.getNewEnemy(Enemy.enemies[i]);
