@@ -94,11 +94,8 @@ var Enemy = {
                 cobject.position.set(0.0,160.0,-400.0);
                 cobject.isAlive = false;
                 
-                //Enemy.getNewEnemy(cobject);
-                
                 Enemy.enemies.push(cobject);
                 
-                //console.log(cobject);
                 scene.add( cobject );                   
             }
             
