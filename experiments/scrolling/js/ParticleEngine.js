@@ -480,3 +480,33 @@ ParticleEngine.prototype.destroy = function()
     scene.remove( this.particleMesh );
 }
 ///////////////////////////////////////////////////////////////////////////////
+
+var ParticleEngines = {
+    engines : [],
+    registerEngine : function(engine, effect) {
+        ParticleEngines.engines.push({
+            'engine':engine,
+            'effect' : effect
+        });
+        
+    },
+    
+    initEngines : function(readyCallback) {
+        for(var i=0;i<ParticleEngines.engines.length;i++) {
+            var engine = ParticleEngines.engines[i].engine;            
+            engine.setValues( ParticleEngines.engines[i].effect);
+            engine.initialize();                        
+        }
+        
+        if(readyCallback) {
+            readyCallback();
+        }
+    },
+    
+    updateBeforeRender : function() {
+        var dt = clock.getDelta();
+        for(var i=0;i<ParticleEngines.engines.length;i++) {
+            ParticleEngines.engines[i].engine.update( dt * 0.5);
+        }    
+    }
+}

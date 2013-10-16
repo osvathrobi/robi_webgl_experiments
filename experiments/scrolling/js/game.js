@@ -20,7 +20,6 @@ var worldWidth = 16, worldDepth = 16,
 worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
 
 var clock = new THREE.Clock();
-var engines = [];
        
 init();
 animate();
@@ -61,45 +60,20 @@ function init() {
 
 
     Terrain.init(scene);
+    
     Ship.init(scene);
+    
     Enemy.init(scene, function() {
         Collision.registerEnemies(Enemy.enemies);
-    });
-    
+    });    
+    ParticleEngines.initEngines(function() {        
+        // collision of bullet / enemy
+        Collision.registerBullets(Ship.particles.leftBulletStream.particleArray);
+        Collision.registerBullets(Ship.particles.rightBulletStream.particleArray);
 
-    var effect = new Effects();
-    effect.smoke.velocityBase = new THREE.Vector3( -20, 0,200 );
-    var engine = new ParticleEngine();
-    engine.setValues( effect.smoke);
-    engine.initialize();
-    engines.push(engine);
-    
-    var effect2 = new Effects();
-    effect2.smoke.velocityBase = new THREE.Vector3( 20, 0,200 );
-    var engine2 = new ParticleEngine();
-    engine2.setValues( effect2.smoke );
-    engine2.initialize();
-    engines.push(engine2);
-    
-    
-    var effect3 = new Effects();
-    var engine3 = new ParticleEngine();
-    engine3.setValues( effect3.bullets );
-    engine3.initialize();
-    engines.push(engine3);
-    
-    var effect4 = new Effects();
-    var engine4 = new ParticleEngine();
-    engine4.setValues( effect4.bullets );
-    engine4.initialize();
-    engines.push(engine4);
-    
-    // collision of bullet / enemy
-    Collision.registerBullets(engine3.particleArray);
-    Collision.registerBullets(engine4.particleArray);    
-    
-    
-    
+    });
+
+
     renderer = new THREE.WebGLRenderer({
         //antialias':true,
         //alpha: false
@@ -196,10 +170,7 @@ function animate() {
     Ship.updateBeforeRender();
     Enemy.updateBeforeRender();
     
-    var dt = clock.getDelta();
-    for(var i=0;i<engines.length;i++) {
-        engines[i].update( dt * 0.5);
-    }
+    ParticleEngines.updateBeforeRender();
     
     Collision.runBulletEnemyCollision();
     

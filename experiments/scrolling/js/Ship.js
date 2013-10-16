@@ -3,8 +3,37 @@ var Ship = {
     ship : '',
     rotZ : 0,
     targetPos:'',
+    particles : {
+        leftExhaust:null,
+        rightExhaust:null,
+        leftBulletStream:null,
+        rightBulletStream:null
+    },
+    
+    setupParticles : function() {
+        Ship.particles.leftExhaust = new ParticleEngine();
+        Ship.particles.rightExhaust = new ParticleEngine();
+        Ship.particles.leftBulletStream = new ParticleEngine();
+        Ship.particles.rightBulletStream = new ParticleEngine();
+
+        var effect = new Effects();
+        effect.smoke.velocityBase = new THREE.Vector3( -20, 0,200 );
+        ParticleEngines.registerEngine(Ship.particles.leftExhaust, effect.smoke);
+        
+        var effect = new Effects();
+        effect.smoke.velocityBase = new THREE.Vector3( 20, 0,200 );
+        ParticleEngines.registerEngine(Ship.particles.rightExhaust, effect.smoke);
+        
+        var effect = new Effects();
+        ParticleEngines.registerEngine(Ship.particles.leftBulletStream, effect.bullets);
+        
+        var effect = new Effects();
+        ParticleEngines.registerEngine(Ship.particles.rightBulletStream, effect.bullets);    
+    },
     
     init : function(scene) {
+        
+        Ship.setupParticles();
         
         var loader = new THREE.OBJMTLLoader();
         loader.addEventListener( 'load', function ( event ) {
@@ -66,12 +95,12 @@ var Ship = {
             Ship.rotZ += 0.04;
         }
         
-        engines[0].positionBase.set( Ship.ship.position.x - 3, Ship.ship.position.y, Ship.ship.position.z - 5 );
-        engines[1].positionBase.set( Ship.ship.position.x + 3, Ship.ship.position.y, Ship.ship.position.z - 5 );
+        Ship.particles.leftExhaust.positionBase.set( Ship.ship.position.x - 3, Ship.ship.position.y, Ship.ship.position.z - 5 );
+        Ship.particles.rightExhaust.positionBase.set( Ship.ship.position.x + 3, Ship.ship.position.y, Ship.ship.position.z - 5 );
         
         var vec3 = new THREE.Vector3( 18.0 * Math.cos(Ship.rotZ), 12.0 * Math.sin(Ship.rotZ), 0 );
-        engines[2].positionBase.set( Ship.ship.position.x  - vec3.x, - vec3.y + Ship.ship.position.y, Ship.ship.position.z - 3 );
-        engines[3].positionBase.set( Ship.ship.position.x  + vec3.x, + vec3.y + Ship.ship.position.y, Ship.ship.position.z - 3 );
+        Ship.particles.leftBulletStream.positionBase.set( Ship.ship.position.x  - vec3.x, - vec3.y + Ship.ship.position.y, Ship.ship.position.z - 3 );
+        Ship.particles.rightBulletStream.positionBase.set( Ship.ship.position.x  + vec3.x, + vec3.y + Ship.ship.position.y, Ship.ship.position.z - 3 );
         
     },
     
