@@ -106,7 +106,7 @@ var Enemy = {
                 readyCallback();
             }
         });
-        loader.load( 'meshes/A6M_ZERO.obj', 'meshes/A6M_ZERO.mtl' );
+        loader.load( 'meshes/a6m/A6M_ZERO.obj', 'meshes/a6m/A6M_ZERO.mtl' );
 
     },
     

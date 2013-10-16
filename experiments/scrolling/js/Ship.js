@@ -49,7 +49,7 @@ var Ship = {
             Ship.prop = object.children[10];
             Ship.ship = object;
         });
-        loader.load( 'meshes/spitfire.obj', 'meshes/spitfire.mtl' );
+        loader.load( 'meshes/spitfire/spitfire.obj', 'meshes/spitfire/spitfire.mtl' );
 
     },
     
