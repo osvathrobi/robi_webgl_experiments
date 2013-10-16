@@ -1,31 +1,81 @@
 var Enemy = {
     enemies : [],
-    enemyBudget : 10,
+    enemyBudget : 20,
     time : 0,
     wp:0,
     zRange : 300,
     
-    getNewEnemy : function(cobject) {
-        cobject.position.set(
-            1000 - (Math.random() * 2000), 
-            160, // + (Math.random() * 120), 
-            -200 +  (Math.random() * (-Enemy.zRange))
-            );
-                
+    getNewPath : function() {
+        var arr = [];
+        
+        arr.push({
+            x:-200,
+            y:20,
+            z:-400
+        });
+        arr.push({
+            x:-150,
+            y:80,
+            z:150
+        });
+        arr.push({
+            x:0,
+            y:190,
+            z:50
+        });
+        arr.push({
+            x:150,
+            y:80,
+            z:150
+        });
+        
+        arr.push({
+            x:200,
+            y:20,
+            z:-200
+        });
+        
+        
+        
+        arr.push({
+            x:00,
+            y:150,
+            z:0
+        });
+        
+        arr.push({
+            x:-200,
+            y:210,
+            z:150
+        });
+        
+        arr.push({
+            x:800,
+            y:20,
+            z:-150
+        });
+        
+        return arr;
+    },
+    
+    getNewEnemy : function(cobject) {                
         cobject.speed = (Math.random() * 2.0) + 1.8;
-                
-        cobject.direction = new THREE.Vector3(
-            -400 + (Math.random() * 800),
-            0,
-            0
-            );
-               
+       
         cobject.rotZ = 0;
+        
+        cobject.scale.set(2.0,2.0,2.0);
         
         cobject.animateHit = false;
         cobject.animateHitCounter = 0;
-        cobject.HP = 10;
+        cobject.HP = 4;
         cobject.animateDeath = false;
+        
+        cobject.spline = new THREE.SplineCurve3(Enemy.getNewPath());
+        cobject.spline.updateArcLengths();
+        cobject.spline_pos = 0.0;
+        
+        cobject.isAlive = true;
+        
     },
     
     init : function(scene, readyCallback) {
@@ -39,31 +89,12 @@ var Enemy = {
                 
                 var cobject = object.clone();    
                 cobject.children[0].children[0].material = cobject.children[0].children[0].material.clone();
-                //cobject.children[0].material = cobject.children[0].material.clone();
-                
-                //var newmat = new THREE.MeshBasicMaterial();
-                //newmat.map = cobject.children[0].material.map;
-                
-                //cobject.children[0].material = newmat;
-                
-                //cobject.children[0].material.transparent = true;
-                //cobject.children[0].material.blending = 1; 
-                //cobject.children[0].material.alphaTest = 0.5; 
-                //cobject.children[0].material.depthTest = true;
-                //cobject.children[0].material.depthWrite = true;
-        
-                //cobject.children[0].material.opacity  = 1.0;
-        
-                //cobject.children[0].material.blending = THREE.CustomBlending;
-                //cobject.children[0].material.blendSrc = THREE.SrcColorFactor;
-                //cobject.children[0].material.blendDst = THREE.OneMinusSrcColorFactor;
-                //cobject.children[0].material.blendSrc = THREE.SrcAlphaFactor;
-                //cobject.children[0].material.blendDst = THREE.OneMinusSrcAlphaFactor;
-                //cobject.children[0].material.blendEquation = THREE.AddEquation;
     
                 cobject.scale.set(2.0,2.0,2.0);
+                cobject.position.set(0.0,160.0,-400.0);
+                cobject.isAlive = false;
                 
-                Enemy.getNewEnemy(cobject);
+                //Enemy.getNewEnemy(cobject);
                 
                 Enemy.enemies.push(cobject);
                 
@@ -79,62 +110,116 @@ var Enemy = {
 
     },
     
+    updateOnHitEffects : function(i) {
+        
+        // is death
+        if(Enemy.enemies[i].animateDeath) {
+            Enemy.enemies[i].position.y-=1.8;
+            var a = Enemy.time / 40.0;
+            if(i%2==0) {
+                a=-a;
+            }
+            Enemy.enemies[i].rotation.set(0,a * 6.8,a * 6.8);
+            
+            if(Enemy.enemies[i].scale.x > 0) {
+                Enemy.enemies[i].scale.x -= 0.01;
+            }
+            var s = Enemy.enemies[i].scale.x;
+            Enemy.enemies[i].scale.set(s,s,s);
+            
+            if(Enemy.enemies[i].position.y < 0) {
+                //Enemy.getNewEnemy(Enemy.enemies[i]);
+                Enemy.enemies[i].isAlive = false;
+            }
+                
+            Enemy.enemies[i].children[0].children[0].material.color.setRGB(0.14,0.14,0.14);
+        } else {
+                
+            // on hit
+            if(Enemy.enemies[i].animateHitCounter>0) {                
+                Enemy.enemies[i].animateHitCounter--;
+                
+                if(Enemy.enemies[i].animateHit) {
+                    Enemy.enemies[i].children[0].children[0].material.color.setRGB(2.0,2.0,2.0);
+                } else {
+                    Enemy.enemies[i].children[0].children[0].material.color.setRGB(1.0,1.0,1.0);    
+                }
+                
+                Enemy.enemies[i].animateHit = !Enemy.enemies[i].animateHit
+            } else {
+                Enemy.enemies[i].children[0].children[0].material.color.setRGB(0.64,0.64,0.64);
+            }
+        
+        
+        }
+    },
+    
+    wave : 0,
+    pause : 0,
+    
     updateBeforeRender : function() {
-        Enemy.time += 0.02;
+        Enemy.time += 1;
         
         
+        if(Enemy.time >= 18) {
+            //console.log('New enemy..', Enemy.time);          
+            Enemy.time = 0;
+            
+            // find empty enemy slot
+            var i =0;
+            while( (i<Enemy.enemies.length) && (Enemy.enemies[i].isAlive)) {
+                i++;
+            }
+            
+            if((i<Enemy.enemies.length)) {
+                Enemy.wave++
+                if(Enemy.wave > 5) {
+                    Enemy.pause++;                
+                    if(Enemy.pause > 2) {
+                        Enemy.pause = 0;
+                        Enemy.wave = 0;
+                    }
+                } else {
+                    Enemy.getNewEnemy(Enemy.enemies[i]);
+                }
+            }
+        }
         
         for(var i=0;i<Enemy.enemies.length;i++) {
-        
-        
-            
-            
-            // move planes
-            var direction = Enemy.enemies[i].direction;
-            
-            if(direction.x < Enemy.enemies[i].position.x) {
                 
-                if(Math.abs(direction.x - Enemy.enemies[i].position.x) > 10) {
-                    Enemy.enemies[i].position.x-=1.5;
+            
+            
+            if(Enemy.enemies[i].isAlive && (!Enemy.enemies[i].animateDeath)) {
+                Enemy.enemies[i].spline_pos += 0.001;
+                
+                if(Enemy.enemies[i].spline_pos<=1.0) {
+                
+                    var sp = Enemy.enemies[i].spline.getPointAt(Enemy.enemies[i].spline_pos);
+                
+                    var axis = new THREE.Vector3();
+                    var up = new THREE.Vector3(0, 0, 1);
+
+                    var tangent = Enemy.enemies[i].spline.getTangentAt(Enemy.enemies[i].spline_pos).normalize();
+                    axis.crossVectors( up, tangent ).normalize();
+                    var radians = Math.acos( up.dot( tangent ) );
+                    //Enemy.enemies[i].quaternion.setFromAxisAngle(axis, radians);
                     
-                    if(Enemy.enemies[i].rotZ<0.6)
-                        Enemy.enemies[i].rotZ+=0.05;
-                } else {
-                    if(Enemy.enemies[i].rotZ>0)
-                        Enemy.enemies[i].rotZ-=0.05;    
-                }
-                
-                Enemy.enemies[i].rotation.set(0.0,0.0, Enemy.enemies[i].rotZ);
-            }
-            else {
-                
-                if(Math.abs(direction.x - Enemy.enemies[i].position.x) > 10) {
-                    Enemy.enemies[i].position.x+=1.5;
-                                
-                    if(Enemy.enemies[i].rotZ>-0.6)
-                        Enemy.enemies[i].rotZ-=0.05;
-                } else {
-                    if(Enemy.enemies[i].rotZ<0)
-                        Enemy.enemies[i].rotZ+=0.05;   
-                }
-                
-                Enemy.enemies[i].rotation.set(0.0,0.0, Enemy.enemies[i].rotZ);
-            }
-            
-            var speed=Enemy.enemies[i].speed;
-        
-            if(Enemy.enemies[i].position.z>200) {                                
-                Enemy.getNewEnemy(Enemy.enemies[i]);
-                Enemy.enemies[i].position.z = -Enemy.zRange + (speed);
-            }
-        
-            Enemy.enemies[i].position.set(
-                Enemy.enemies[i].position.x, 
-                Enemy.enemies[i].position.y, 
-                Enemy.enemies[i].position.z + speed
-                );
+                    var quaternion = new THREE.Quaternion().setFromAxisAngle(axis, radians);
+                    Enemy.enemies[i].rotation.setEulerFromQuaternion(quaternion);
+ 
+                    Enemy.enemies[i].position.set(
+                        sp.x,
+                        sp.y,
+                        sp.z
+                        );
+                            
                     
-                     
+                            
+                } else {
+                    Enemy.enemies[i].isAlive = false;
+                }
+            }
+                    
             Enemy.enemies[i].collisionRect = {
                 left:   Enemy.enemies[i].position.x - 3,
                 top:    Enemy.enemies[i].position.z - 3,
@@ -144,40 +229,7 @@ var Enemy = {
                 
                 
                 
-                
-            // is death
-            if(Enemy.enemies[i].animateDeath) {
-                Enemy.enemies[i].position.y-=1.8;
-                var a = Enemy.time;
-                if(i%2==0) {
-                    a=-a;
-                }
-                Enemy.enemies[i].rotation.set(0.0,a * 6.8,0.0);
-                
-                if(Enemy.enemies[i].position.y < 0) {
-                    Enemy.getNewEnemy(Enemy.enemies[i]);
-                }
-                
-                Enemy.enemies[i].children[0].children[0].material.color.setRGB(0.14,0.14,0.14);
-            } else {
-                
-                // on hit
-                if(Enemy.enemies[i].animateHitCounter>0) {                
-                    Enemy.enemies[i].animateHitCounter--;
-                
-                    if(Enemy.enemies[i].animateHit) {
-                        Enemy.enemies[i].children[0].children[0].material.color.setRGB(2.0,2.0,2.0);
-                    } else {
-                        Enemy.enemies[i].children[0].children[0].material.color.setRGB(1.0,1.0,1.0);    
-                    }
-                
-                    Enemy.enemies[i].animateHit = !Enemy.enemies[i].animateHit
-                } else {
-                    Enemy.enemies[i].children[0].children[0].material.color.setRGB(0.64,0.64,0.64);
-                }
-        
-        
-            }
+            Enemy.updateOnHitEffects(i);
             
             
             

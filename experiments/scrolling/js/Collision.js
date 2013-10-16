@@ -16,7 +16,8 @@ var Collision = {
             for(var j=0;j<Collision.enemies.length; j++){
                 if( (Collision.bullets[i].age>0) && 
                     (Collision.bullets[i].alive>0) &&
-                    (Collision.enemies[j].HP>0)
+                    (Collision.enemies[j].HP>0) &&
+                    (Collision.enemies[j].position.y>140)
                     ) {
                     
                     if(Collision.intersectRect(

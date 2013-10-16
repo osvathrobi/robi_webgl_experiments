@@ -16,9 +16,9 @@ var Terrain = {
             Terrain.addDoodads(scene, event.content, event.extra);            
         });
         
-        loader.load( 'meshes/barrel/barrel.obj', 'meshes/barrel/barrel.mtl', 120);
-        loader.load( 'meshes/corn/corn.obj', 'meshes/corn/corn.mtl', 120);
-        loader.load( 'meshes/car_scrap/car_scrap.obj', 'meshes/car_scrap/car_scrap.mtl', 10);
+        loader.load( 'meshes/barrel/barrel.obj', 'meshes/barrel/barrel.mtl', 1);
+        loader.load( 'meshes/corn/corn.obj', 'meshes/corn/corn.mtl', 1);
+        loader.load( 'meshes/car_scrap/car_scrap.obj', 'meshes/car_scrap/car_scrap.mtl', 1);
         
         
         Terrain.initLoaded(scene);
