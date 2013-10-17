@@ -111,7 +111,7 @@ var Enemy = {
         
         // is death
         if(Enemy.enemies[i].animateDeath) {
-            Enemy.enemies[i].position.y-=1.8;
+            Enemy.enemies[i].position.y-=1.2;
             var a = Enemy.time / 40.0;
             if(i%2==0) {
                 a=-a;
@@ -245,6 +245,17 @@ var Enemy = {
         
         if(Enemy.enemies[i].HP==0) {            
             Enemy.enemies[i].animateDeath = true;
+            
+            var v = new THREE.Vector3();
+            v.x = Enemy.enemies[i].position.x;
+            v.y = Enemy.enemies[i].position.y - 6.0;
+            v.z = Enemy.enemies[i].position.z;
+            
+            Explosions.newExplosion(Enemy.enemies[i].position);
+            Explosion.prototype.update(0);
+            
+            //Enemy.enemies[i].isAlive = false;
+            //Enemy.enemies[i].position.z = -2000;
         }
     }
 }

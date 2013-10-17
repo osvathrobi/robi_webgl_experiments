@@ -65,7 +65,8 @@ function init() {
     
     Enemy.init(scene, function() {
         Collision.registerEnemies(Enemy.enemies);
-    });    
+    });
+    
     ParticleEngines.initEngines(function() {        
         // collision of bullet / enemy
         Collision.registerBullets(Ship.particles.leftBulletStream.particleArray);
@@ -73,6 +74,7 @@ function init() {
 
     });
 
+    Explosions.init();
 
     renderer = new THREE.WebGLRenderer({
         //antialias':true,
@@ -171,6 +173,7 @@ function animate() {
     Enemy.updateBeforeRender();
     
     ParticleEngines.updateBeforeRender();
+    Explosions.updateBeforeRender();
     
     Collision.runBulletEnemyCollision();
     
